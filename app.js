@@ -210,6 +210,10 @@ function findNeighborhoodNameForPoint(point) {
   return hit?.properties?.cpname || "N/A";
 }
 
+function findNeighborhoodFeatureForPoint(point) {
+  return state.neighborhoodFeatures.find((feature) => pointInFeature(point, feature)) || null;
+}
+
 function updateHexColor(metric) {
   const expression = colorExpressions[metric] || colorExpressions.score;
   if (map.getLayer("hex-fill")) {
@@ -276,7 +280,7 @@ function showHexDashboard(feature) {
   const neighborhood = findNeighborhoodNameForPoint(center);
   setStats(hexStatsEl, [
     ["Hex ID", p.hex_id ?? "N/A"],
-    ["Neighborhood", neighborhood],
+    ["Community Plan", neighborhood],
     ["Combined Score", p.score ?? 0],
     ["Grocery/Convenience", p.grocery_count ?? 0],
     ["Parks", p.park_count ?? 0],
@@ -303,18 +307,12 @@ function showNeighborhoodDashboard(feature) {
     (sum, hex) => sum + Number(hex.properties?.library_count || 0),
     0
   );
-  const avgScore =
-    hexCount === 0
-      ? 0
-      : hexesInNeighborhood.reduce((sum, hex) => sum + Number(hex.properties?.score || 0), 0) / hexCount;
-
   setStats(neighborhoodStatsEl, [
     ["Neighborhood", neighborhoodName],
     ["Hexes", formatNumber(hexCount)],
-    ["Avg Combined Score", formatNumber(avgScore, 2)],
-    ["Grocery/Convenience (sum)", formatNumber(groceryTotal)],
-    ["Parks (sum)", formatNumber(parkTotal)],
-    ["Libraries (sum)", formatNumber(libraryTotal)],
+    ["Total Grocery/Convenience", formatNumber(groceryTotal)],
+    ["Total Parks", formatNumber(parkTotal)],
+    ["Total Libraries", formatNumber(libraryTotal)],
   ]);
 }
 
@@ -478,8 +476,12 @@ map.on("click", "hex-fill", (event) => {
   if (!feature) return;
 
   const props = feature.properties || {};
+  const center = featureCentroid(feature);
+  const neighborhoodFeature = findNeighborhoodFeatureForPoint(center);
+  const communityPlanName = neighborhoodFeature?.properties?.cpname || "N/A";
   const html = `
     <strong>Hex ID:</strong> ${props.hex_id ?? "N/A"}<br>
+    <strong>Community Plan:</strong> ${communityPlanName}<br>
     <strong>Combined Score:</strong> ${props.score ?? 0}<br>
     <strong>Grocery/Convenience Count:</strong> ${props.grocery_count ?? 0}<br>
     <strong>Park Count:</strong> ${props.park_count ?? 0}<br>
@@ -487,6 +489,9 @@ map.on("click", "hex-fill", (event) => {
   `;
 
   showHexDashboard(feature);
+  if (neighborhoodFeature?.properties?.cpcode !== undefined) {
+    flashSelectedNeighborhood(neighborhoodFeature.properties.cpcode);
+  }
 
   new maplibregl.Popup()
     .setLngLat(event.lngLat)
