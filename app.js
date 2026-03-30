@@ -200,7 +200,29 @@ function showNeighborhoodDashboard(feature) {
 
 const map = new maplibregl.Map({
   container: "map",
-  style: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
+  style: {
+    version: 8,
+    sources: {
+      "osm-raster": {
+        type: "raster",
+        tiles: [
+          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      },
+    },
+    layers: [
+      {
+        id: "osm-raster",
+        type: "raster",
+        source: "osm-raster",
+        minzoom: 0,
+        maxzoom: 19,
+      },
+    ],
+  },
   center: sanDiegoCenter,
   zoom: 11,
 });
