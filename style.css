@@ -1,7 +1,7 @@
 :root {
-  --panel-bg: #f4f7f9;
-  --text: #13343b;
-  --border: #d9e3e8;
+  --panel-bg: #f5f7f8;
+  --text: #12242d;
+  --border: #d7dde1;
 }
 
 * {
@@ -12,7 +12,7 @@ html,
 body {
   height: 100%;
   margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   color: var(--text);
 }
 
@@ -23,30 +23,125 @@ body {
 }
 
 .panel {
-  padding: 1rem;
+  padding: 1.1rem 1rem;
   border-right: 1px solid var(--border);
   background: var(--panel-bg);
+  overflow-y: auto;
 }
 
 .panel h1 {
   margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.25rem;
+  margin-bottom: 0.8rem;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
-.panel p {
-  margin: 0.5rem 0;
-  line-height: 1.4;
+.control-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #3c5661;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
-.hint {
+.control-select {
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.control-range {
+  width: 100%;
+  accent-color: #1f8f6a;
+}
+
+.control-note {
+  margin: 0.45rem 0 0;
+  font-size: 0.8rem;
+  color: #4f6570;
+}
+
+.top-gap {
+  margin-top: 1rem;
+}
+
+.mode-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+.mode-btn {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.45rem 0.5rem;
   font-size: 0.9rem;
-  opacity: 0.85;
+  cursor: pointer;
+}
+
+.mode-btn.is-active {
+  background: #dff2ea;
+  border-color: #7dc6ac;
+  color: #0d3f31;
+  font-weight: 600;
+}
+
+.dashboard-card {
+  margin-top: 1rem;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.is-hidden {
+  display: none;
+}
+
+.dashboard-card h2 {
+  margin: 0 0 0.55rem;
+  font-size: 0.95rem;
+}
+
+.about-text p {
+  margin: 0.35rem 0;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: #334f5a;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.6rem;
+  font-size: 0.86rem;
+}
+
+.stat-key {
+  color: #4d646f;
+}
+
+.stat-value {
+  font-weight: 600;
 }
 
 #map {
   width: 100%;
   height: 100%;
+}
+
+.maplibregl-popup-content {
+  padding: 0.65rem 0.7rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
 }
 
 @media (max-width: 800px) {
