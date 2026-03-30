@@ -200,6 +200,7 @@ function showNeighborhoodDashboard(feature) {
 
 const map = new maplibregl.Map({
   container: "map",
+  attributionControl: false,
   style: {
     version: 8,
     sources: {
@@ -228,6 +229,13 @@ const map = new maplibregl.Map({
 });
 
 map.addControl(new maplibregl.NavigationControl(), "top-right");
+map.addControl(
+  new maplibregl.AttributionControl({
+    compact: true,
+    customAttribution:
+      '<a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre</a>',
+  })
+);
 
 setStats(hexStatsEl, [["Status", "Click a hex"]]);
 setStats(neighborhoodStatsEl, [["Status", "Switch to Neighborhood mode and click a plan"]]);
