@@ -2,8 +2,6 @@
 
 Live app: [https://bmarkman1234.github.io/walkSD/](https://bmarkman1234.github.io/walkSD/)
 
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/bmarkman1234/walkSD)
--> Repo: [github.com/bmarkman1234/walkSD](https://github.com/bmarkman1234/walkSD)
 
 ## How to Use
 
