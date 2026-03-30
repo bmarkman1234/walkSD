@@ -19,7 +19,8 @@ body {
 .layout {
   display: grid;
   grid-template-columns: 300px 1fr;
-  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .panel {
@@ -136,6 +137,7 @@ body {
 #map {
   width: 100%;
   height: 100%;
+  min-height: 320px;
 }
 
 .maplibregl-popup-content {
@@ -147,11 +149,18 @@ body {
 @media (max-width: 800px) {
   .layout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: minmax(52vh, 58dvh) auto;
   }
 
   .panel {
+    grid-row: 2;
     border-right: 0;
     border-bottom: 1px solid var(--border);
+    max-height: 42dvh;
+  }
+
+  #map {
+    grid-row: 1;
+    min-height: 52vh;
   }
 }
