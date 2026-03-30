@@ -3,10 +3,83 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Redirecting to walksd</title>
-  <meta http-equiv="refresh" content="0; url=./walksd.html" />
+  <title>San Diego Walkability Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.css" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <p>Redirecting to <a href="./walksd.html">walksd.html</a>...</p>
+  <div class="layout">
+    <aside class="panel">
+      <h1>San Diego Walkability</h1>
+
+      <label for="metric-select" class="control-label">Color By</label>
+      <select id="metric-select" class="control-select" aria-label="Choose hex color metric">
+        <option value="score" selected>Combined Score</option>
+        <option value="grocery_count">Grocery Count</option>
+        <option value="park_count">Park Count</option>
+        <option value="library_count">Library Count</option>
+      </select>
+
+      <label for="roads-slider" class="control-label top-gap">Basemap Visibility</label>
+      <input
+        id="roads-slider"
+        class="control-range"
+        type="range"
+        min="0.05"
+        max="0.55"
+        step="0.05"
+        value="0.25"
+      />
+
+      <label class="control-label top-gap">Click Mode</label>
+      <div class="mode-row" role="group" aria-label="Selection mode">
+        <button id="mode-hex" class="mode-btn is-active" type="button">Hex</button>
+        <button id="mode-neighborhood" class="mode-btn" type="button">Neighborhood</button>
+      </div>
+
+      <section id="hex-card" class="dashboard-card">
+        <h2>Selected Hex</h2>
+        <div id="hex-stats" class="stats-grid"></div>
+      </section>
+
+      <section id="neighborhood-card" class="dashboard-card is-hidden">
+        <h2>Neighborhood Summary</h2>
+        <div id="neighborhood-stats" class="stats-grid"></div>
+      </section>
+
+      <section class="dashboard-card">
+        <h2>How Scores Work</h2>
+        <div class="about-text">
+          <p><strong>Combined Score range:</strong> 0 to 3 per hex.</p>
+          <p>+1 if at least one grocery is within 800m.</p>
+          <p>+1 if at least one park is within 800m.</p>
+          <p>+1 if at least one library is within 1200m.</p>
+        </div>
+      </section>
+
+      <section class="dashboard-card">
+        <h2>Why Hexes Help</h2>
+        <div class="about-text">
+          <p>Hexes make coverage easier to compare across neighborhoods.</p>
+          <p>They smooth noisy point data into a consistent map pattern.</p>
+          <p>This reduces visual clutter while still showing local differences.</p>
+        </div>
+      </section>
+
+      <section class="dashboard-card">
+        <h2>🦆 DuckDB in This Project</h2>
+        <div class="about-text">
+          <p>DuckDB Spatial was used to count nearby amenities for each hex centroid.</p>
+          <p>It computes grocery and park counts within 800 meters, and library counts within 1200 meters.</p>
+          <p>Those counts are then combined into the final Combined Score shown on the map.</p>
+        </div>
+      </section>
+
+    </aside>
+    <main id="map" aria-label="Map of San Diego"></main>
+  </div>
+
+  <script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
