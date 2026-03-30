@@ -213,8 +213,8 @@ setMode("hex");
 
 map.on("load", async () => {
   const [hexData, neighborhoodData] = await Promise.all([
-    fetch("./public/data/hex_scores.geojson").then((r) => r.json()),
-    fetch("./public/data/community_plans.geojson").then((r) => r.json()),
+    fetch("./data/hex_scores.geojson").then((r) => r.json()),
+    fetch("./data/community_plans.geojson").then((r) => r.json()),
   ]);
 
   state.hexFeatures = (hexData.features || []).map((f) => ({ ...f, _centroid: featureCentroid(f) }));

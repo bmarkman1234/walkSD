@@ -9,19 +9,19 @@ import geopandas as gpd
 def main() -> None:
     # Paths.
     project_root = Path(__file__).resolve().parents[1]
-    data_raw_dir = project_root / "data_raw"
-    hexes_path = project_root / "data_raw" / "hexes.geojson"
-    groceries_path = project_root / "data_raw" / "groceries.geojson"
-    parks_path = project_root / "data_raw" / "parks.geojson"
-    libraries_path = project_root / "data_raw" / "libraries.geojson"
-    community_plans_path = project_root / "public" / "data" / "community_plans.geojson"
-    output_path = project_root / "public" / "data" / "hex_scores.geojson"
+    data_dir = project_root / "data"
+    hexes_path = data_dir / "hexes.geojson"
+    groceries_path = data_dir / "groceries.geojson"
+    parks_path = data_dir / "parks.geojson"
+    libraries_path = data_dir / "libraries.geojson"
+    community_plans_path = data_dir / "community_plans.geojson"
+    output_path = data_dir / "hex_scores.geojson"
 
-    # Find San Diego boundary file uploaded to data_raw.
-    boundary_candidates = sorted(data_raw_dir.glob("*boundary*.geojson"))
+    # Find San Diego boundary file uploaded to data.
+    boundary_candidates = sorted(data_dir.glob("*boundary*.geojson"))
     boundary_candidates = [p for p in boundary_candidates if "san_diego" in p.stem.lower()] or boundary_candidates
     if not boundary_candidates:
-        print("Error: Could not find a boundary GeoJSON in data_raw (expected *boundary*.geojson).")
+        print("Error: Could not find a boundary GeoJSON in data (expected *boundary*.geojson).")
         raise SystemExit(1)
     boundary_path = boundary_candidates[0]
 

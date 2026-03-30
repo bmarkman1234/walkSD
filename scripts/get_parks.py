@@ -14,7 +14,7 @@ def main() -> None:
     gdf = ox.features_from_place(place_name, tags=tags)
 
     if gdf.empty:
-        print("Saved 0 features to data_raw/parks.geojson")
+        print("Saved 0 features to data/parks.geojson")
         return
 
     # Keep useful attributes when present, plus geometry.
@@ -36,7 +36,7 @@ def main() -> None:
     # Export as EPSG:4326 GeoJSON.
     parks_points = projected.to_crs(epsg=4326)
     project_root = Path(__file__).resolve().parents[1]
-    output_path = project_root / "data_raw" / "parks.geojson"
+    output_path = project_root / "data" / "parks.geojson"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     parks_points.to_file(output_path, driver="GeoJSON")
 
