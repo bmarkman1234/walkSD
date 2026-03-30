@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -10,26 +10,31 @@
 <body>
   <div class="layout">
     <aside class="panel">
-      <h1>San Diego Walkability</h1>
+      <h1>walkSD</h1>
+      <p class="app-subtitle">Explore walkability by neighborhood and hex.</p>
 
       <label for="metric-select" class="control-label">Color By</label>
       <select id="metric-select" class="control-select" aria-label="Choose hex color metric">
         <option value="score" selected>Combined Score</option>
-        <option value="grocery_count">Grocery Count</option>
+        <option value="grocery_count">Grocery/Convenience Count</option>
         <option value="park_count">Park Count</option>
         <option value="library_count">Library Count</option>
       </select>
 
-      <label for="roads-slider" class="control-label top-gap">Basemap Visibility</label>
+      <label for="emphasis-slider" class="control-label top-gap">Layer Emphasis</label>
       <input
-        id="roads-slider"
+        id="emphasis-slider"
         class="control-range"
         type="range"
-        min="0.05"
-        max="0.55"
-        step="0.05"
-        value="0.25"
+        min="0"
+        max="100"
+        step="1"
+        value="100"
       />
+      <div class="slider-ends">
+        <span>Community Boundaries</span>
+        <span>Hex Visibility</span>
+      </div>
 
       <label class="control-label top-gap">Click Mode</label>
       <div class="mode-row" role="group" aria-label="Selection mode">
@@ -51,7 +56,7 @@
         <h2>How Scores Work</h2>
         <div class="about-text">
           <p><strong>Combined Score range:</strong> 0 to 3 per hex.</p>
-          <p>+1 if at least one grocery is within 800m.</p>
+          <p>+1 if at least one grocery/convenience store is within 800m.</p>
           <p>+1 if at least one park is within 800m.</p>
           <p>+1 if at least one library is within 1200m.</p>
         </div>
@@ -60,18 +65,10 @@
       <section class="dashboard-card">
         <h2>Why Hexes Help</h2>
         <div class="about-text">
-          <p>Hexes make coverage easier to compare across neighborhoods.</p>
-          <p>They smooth noisy point data into a consistent map pattern.</p>
-          <p>This reduces visual clutter while still showing local differences.</p>
-        </div>
-      </section>
-
-      <section class="dashboard-card">
-        <h2>🦆 DuckDB in This Project</h2>
-        <div class="about-text">
-          <p>DuckDB Spatial was used to count nearby amenities for each hex centroid.</p>
-          <p>It computes grocery and park counts within 800 meters, and library counts within 1200 meters.</p>
-          <p>Those counts are then combined into the final Combined Score shown on the map.</p>
+          <p>Hexes make coverage easier to compare across neighborhoods and reduce directional bias versus square grids.</p>
+          <p>Reference: <a href="https://pro.arcgis.com/en/pro-app/3.4/tool-reference/spatial-statistics/h-whyhexagons.htm#:~:text=Hexagons%20are%20preferable%20when%20your,2%20times%20N%20units%20away)." target="_blank" rel="noopener">ArcGIS: Why hexagons?</a>.</p>
+          <p>For this walkshed map, hexes are used to summarize nearby access (800m for grocery/convenience and parks, 1200m for libraries) in a consistent way.</p>
+          <p>The hex size was chosen to balance local detail with stability: small enough to show neighborhood-level change, but large enough to avoid block-by-block noise.</p>
         </div>
       </section>
 

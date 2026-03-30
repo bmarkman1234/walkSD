@@ -1,7 +1,7 @@
 :root {
-  --panel-bg: #f5f7f8;
-  --text: #12242d;
-  --border: #d7dde1;
+  --panel-bg: #f7f7f7;
+  --text: #111111;
+  --border: #d0d0d0;
 }
 
 * {
@@ -32,9 +32,15 @@ body {
 
 .panel h1 {
   margin-top: 0;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.15rem;
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.app-subtitle {
+  margin: 0 0 0.75rem;
+  font-size: 0.84rem;
+  color: #555555;
 }
 
 .control-label {
@@ -42,7 +48,7 @@ body {
   margin-bottom: 0.35rem;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #3c5661;
+  color: #444444;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -59,13 +65,21 @@ body {
 
 .control-range {
   width: 100%;
-  accent-color: #1f8f6a;
+  accent-color: #2f2f2f;
+}
+
+.slider-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+  font-size: 0.74rem;
+  color: #555555;
 }
 
 .control-note {
   margin: 0.45rem 0 0;
   font-size: 0.8rem;
-  color: #4f6570;
+  color: #555555;
 }
 
 .top-gap {
@@ -89,9 +103,9 @@ body {
 }
 
 .mode-btn.is-active {
-  background: #dff2ea;
-  border-color: #7dc6ac;
-  color: #0d3f31;
+  background: #e6e6e6;
+  border-color: #9a9a9a;
+  color: #111111;
   font-weight: 600;
 }
 
@@ -116,7 +130,7 @@ body {
   margin: 0.35rem 0;
   font-size: 0.84rem;
   line-height: 1.35;
-  color: #334f5a;
+  color: #3f3f3f;
 }
 
 .stats-grid {
@@ -127,7 +141,7 @@ body {
 }
 
 .stat-key {
-  color: #4d646f;
+  color: #4a4a4a;
 }
 
 .stat-value {

@@ -1,7 +1,7 @@
-const sanDiegoCenter = [-117.1611, 32.7157];
+﻿const sanDiegoCenter = [-117.1611, 32.7157];
 
 const metricSelect = document.getElementById("metric-select");
-const roadsSlider = document.getElementById("roads-slider");
+const emphasisSlider = document.getElementById("emphasis-slider");
 const modeHexBtn = document.getElementById("mode-hex");
 const modeNeighborhoodBtn = document.getElementById("mode-neighborhood");
 const hexStatsEl = document.getElementById("hex-stats");
@@ -13,7 +13,22 @@ const state = {
   mode: "hex",
   hexFeatures: [],
   neighborhoodFeatures: [],
+  flashIntervalId: null,
+  flashTimeoutId: null,
 };
+
+const neighborhoodPalette = [
+  "#E69F00",
+  "#56B4E9",
+  "#009E73",
+  "#CC79A7",
+  "#0072B2",
+  "#D55E00",
+  "#F0E442",
+  "#8C510A",
+  "#5AB4AC",
+  "#7B3294",
+];
 
 const colorExpressions = {
   score: [
@@ -60,6 +75,18 @@ function setMode(mode) {
   modeNeighborhoodBtn.classList.toggle("is-active", mode === "neighborhood");
   hexCardEl.classList.toggle("is-hidden", mode !== "hex");
   neighborhoodCardEl.classList.toggle("is-hidden", mode !== "neighborhood");
+
+  if (mode === "hex" && map.getLayer("community-plan-selected")) {
+    if (state.flashIntervalId) {
+      clearInterval(state.flashIntervalId);
+      state.flashIntervalId = null;
+    }
+    if (state.flashTimeoutId) {
+      clearTimeout(state.flashTimeoutId);
+      state.flashTimeoutId = null;
+    }
+    map.setFilter("community-plan-selected", ["==", ["get", "cpcode"], -99999]);
+  }
 }
 
 function setStats(el, rows) {
@@ -132,6 +159,52 @@ function pointInFeature(point, feature) {
   return false;
 }
 
+function getFeatureBounds(feature) {
+  const geom = feature.geometry;
+  if (!geom) return null;
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  function visitCoords(coords) {
+    if (typeof coords[0] === "number") {
+      const [x, y] = coords;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+      return;
+    }
+    coords.forEach(visitCoords);
+  }
+
+  visitCoords(geom.coordinates);
+  if (!Number.isFinite(minX)) return null;
+  return [[minX, minY], [maxX, maxY]];
+}
+
+function getBoundsForFeatureCollection(features) {
+  if (!features || features.length === 0) return null;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const feature of features) {
+    const bounds = getFeatureBounds(feature);
+    if (!bounds) continue;
+    minX = Math.min(minX, bounds[0][0]);
+    minY = Math.min(minY, bounds[0][1]);
+    maxX = Math.max(maxX, bounds[1][0]);
+    maxY = Math.max(maxY, bounds[1][1]);
+  }
+
+  if (!Number.isFinite(minX)) return null;
+  return [[minX, minY], [maxX, maxY]];
+}
+
 function findNeighborhoodNameForPoint(point) {
   const hit = state.neighborhoodFeatures.find((feature) => pointInFeature(point, feature));
   return hit?.properties?.cpname || "N/A";
@@ -144,10 +217,57 @@ function updateHexColor(metric) {
   }
 }
 
-function updateHexOpacity(opacity) {
+function updateLayerEmphasis(value) {
+  const t = Math.max(0, Math.min(100, Number(value))) / 100;
+
+  // Right side (t=1): hexes are strongest.
+  // Left side  (t=0): community boundaries are strongest.
+  const hexOpacity = 0.2 + (0.95 - 0.2) * t;
+  const communityFillOpacity = 0.32 + (0.08 - 0.32) * t;
+  const communityOutlineWidth = 1.6 + (0.85 - 1.6) * t;
+  const communityOutlineOpacity = 1.0 + (0.75 - 1.0) * t;
+
   if (map.getLayer("hex-fill")) {
-    map.setPaintProperty("hex-fill", "fill-opacity", opacity);
+    map.setPaintProperty("hex-fill", "fill-opacity", hexOpacity);
   }
+  if (map.getLayer("community-plan-fill")) {
+    map.setPaintProperty("community-plan-fill", "fill-opacity", communityFillOpacity);
+  }
+  if (map.getLayer("community-plan-outline")) {
+    map.setPaintProperty("community-plan-outline", "line-width", communityOutlineWidth);
+    map.setPaintProperty("community-plan-outline", "line-opacity", communityOutlineOpacity);
+  }
+}
+
+function flashSelectedNeighborhood(cpcode) {
+  if (!map.getLayer("community-plan-selected")) return;
+
+  if (state.flashIntervalId) {
+    clearInterval(state.flashIntervalId);
+    state.flashIntervalId = null;
+  }
+  if (state.flashTimeoutId) {
+    clearTimeout(state.flashTimeoutId);
+    state.flashTimeoutId = null;
+  }
+
+  map.setFilter("community-plan-selected", ["==", ["get", "cpcode"], cpcode]);
+  map.setPaintProperty("community-plan-selected", "line-opacity", 1);
+
+  let visible = true;
+  state.flashIntervalId = setInterval(() => {
+    visible = !visible;
+    map.setPaintProperty("community-plan-selected", "line-opacity", visible ? 1 : 0.2);
+  }, 160);
+
+  state.flashTimeoutId = setTimeout(() => {
+    if (state.flashIntervalId) {
+      clearInterval(state.flashIntervalId);
+      state.flashIntervalId = null;
+    }
+    map.setPaintProperty("community-plan-selected", "line-opacity", 1);
+    state.flashTimeoutId = null;
+  }, 1250);
 }
 
 function showHexDashboard(feature) {
@@ -158,7 +278,7 @@ function showHexDashboard(feature) {
     ["Hex ID", p.hex_id ?? "N/A"],
     ["Neighborhood", neighborhood],
     ["Combined Score", p.score ?? 0],
-    ["Groceries", p.grocery_count ?? 0],
+    ["Grocery/Convenience", p.grocery_count ?? 0],
     ["Parks", p.park_count ?? 0],
     ["Libraries", p.library_count ?? 0],
   ]);
@@ -192,7 +312,7 @@ function showNeighborhoodDashboard(feature) {
     ["Neighborhood", neighborhoodName],
     ["Hexes", formatNumber(hexCount)],
     ["Avg Combined Score", formatNumber(avgScore, 2)],
-    ["Groceries (sum)", formatNumber(groceryTotal)],
+    ["Grocery/Convenience (sum)", formatNumber(groceryTotal)],
     ["Parks (sum)", formatNumber(parkTotal)],
     ["Libraries (sum)", formatNumber(libraryTotal)],
   ]);
@@ -221,6 +341,13 @@ const map = new maplibregl.Map({
         source: "osm-raster",
         minzoom: 0,
         maxzoom: 19,
+        paint: {
+          // Make the basemap cleaner so road structure stands out more.
+          "raster-saturation": -0.85,
+          "raster-contrast": 0.2,
+          "raster-brightness-min": 0.15,
+          "raster-brightness-max": 0.95,
+        },
       },
     ],
   },
@@ -242,23 +369,44 @@ setStats(neighborhoodStatsEl, [["Status", "Switch to Neighborhood mode and click
 setMode("hex");
 
 map.on("load", async () => {
-  const [hexData, neighborhoodData] = await Promise.all([
+  const [hexData, neighborhoodData, cityBoundaryData] = await Promise.all([
     fetch("./data/hex_scores.geojson").then((r) => r.json()),
     fetch("./data/community_plans.geojson").then((r) => r.json()),
+    fetch("./data/san_diego_boundary.geojson").then((r) => r.json()),
   ]);
 
   state.hexFeatures = (hexData.features || []).map((f) => ({ ...f, _centroid: featureCentroid(f) }));
-  state.neighborhoodFeatures = neighborhoodData.features || [];
+  state.neighborhoodFeatures = (neighborhoodData.features || []).map((feature, idx) => ({
+    ...feature,
+    properties: {
+      ...(feature.properties || {}),
+      plan_color: neighborhoodPalette[idx % neighborhoodPalette.length],
+      plan_index: idx,
+    },
+  }));
+  neighborhoodData.features = state.neighborhoodFeatures;
 
   map.addSource("hex-scores", { type: "geojson", data: hexData });
   map.addSource("community-plans", { type: "geojson", data: neighborhoodData });
+  map.addSource("city-boundary", { type: "geojson", data: cityBoundaryData });
+
+  map.addLayer({
+    id: "city-boundary-outline",
+    type: "line",
+    source: "city-boundary",
+    paint: {
+      "line-color": "#1a1a1a",
+      "line-width": 1.8,
+      "line-opacity": 0.8,
+    },
+  });
 
   map.addLayer({
     id: "community-plan-fill",
     type: "fill",
     source: "community-plans",
     paint: {
-      "fill-color": "#ffd27f",
+      "fill-color": ["get", "plan_color"],
       "fill-opacity": 0.08,
     },
   });
@@ -269,7 +417,7 @@ map.on("load", async () => {
     source: "hex-scores",
     paint: {
       "fill-color": colorExpressions.score,
-      "fill-opacity": Number(roadsSlider.value),
+      "fill-opacity": 0.95,
     },
   });
 
@@ -289,14 +437,38 @@ map.on("load", async () => {
     type: "line",
     source: "community-plans",
     paint: {
-      "line-color": "#a75400",
-      "line-width": 2.2,
-      "line-opacity": 0.95,
-      "line-dasharray": [2, 1],
+      "line-color": "#2a2a2a",
+      "line-width": 0.85,
+      "line-opacity": 0.75,
+    },
+  });
+
+  map.addLayer({
+    id: "community-plan-selected",
+    type: "line",
+    source: "community-plans",
+    filter: ["==", ["get", "cpcode"], -99999],
+    paint: {
+      "line-color": "#000000",
+      "line-width": 3.2,
+      "line-opacity": 1,
     },
   });
 
   updateHexColor(metricSelect.value);
+  updateLayerEmphasis(emphasisSlider.value);
+
+  const cityBounds = getBoundsForFeatureCollection(cityBoundaryData.features || []);
+  if (cityBounds) {
+    const isMobile = window.innerWidth <= 800;
+    map.fitBounds(cityBounds, {
+      padding: isMobile
+        ? { top: 22, bottom: 22, left: 22, right: 22 }
+        : { top: 30, bottom: 30, left: 320, right: 30 },
+      duration: 0,
+      maxZoom: 12.2,
+    });
+  }
 });
 
 map.on("click", "hex-fill", (event) => {
@@ -309,7 +481,7 @@ map.on("click", "hex-fill", (event) => {
   const html = `
     <strong>Hex ID:</strong> ${props.hex_id ?? "N/A"}<br>
     <strong>Combined Score:</strong> ${props.score ?? 0}<br>
-    <strong>Grocery Count:</strong> ${props.grocery_count ?? 0}<br>
+    <strong>Grocery/Convenience Count:</strong> ${props.grocery_count ?? 0}<br>
     <strong>Park Count:</strong> ${props.park_count ?? 0}<br>
     <strong>Library Count:</strong> ${props.library_count ?? 0}
   `;
@@ -326,6 +498,20 @@ map.on("click", "community-plan-fill", (event) => {
   if (state.mode !== "neighborhood") return;
   const feature = event.features && event.features[0];
   if (!feature) return;
+
+  flashSelectedNeighborhood(feature.properties?.cpcode);
+  const bounds = getFeatureBounds(feature);
+  if (bounds) {
+    const isMobile = window.innerWidth <= 800;
+    map.fitBounds(bounds, {
+      padding: isMobile
+        ? { top: 24, bottom: 24, left: 24, right: 24 }
+        : { top: 40, bottom: 40, left: 320, right: 40 },
+      duration: 700,
+      maxZoom: 13.5,
+    });
+  }
+
   showNeighborhoodDashboard(feature);
 });
 
@@ -346,6 +532,6 @@ map.on("mouseleave", "community-plan-fill", () => {
 });
 
 metricSelect.addEventListener("change", (event) => updateHexColor(event.target.value));
-roadsSlider.addEventListener("input", (event) => updateHexOpacity(Number(event.target.value)));
+emphasisSlider.addEventListener("input", (event) => updateLayerEmphasis(event.target.value));
 modeHexBtn.addEventListener("click", () => setMode("hex"));
 modeNeighborhoodBtn.addEventListener("click", () => setMode("neighborhood"));
