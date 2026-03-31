@@ -23,12 +23,6 @@ Switch the hex color ramp between:
 - Park Count
 - Library Count
 
-### Layer Emphasis
-
-Slide left/right to visually prioritize layers:
-- Left: stronger community boundaries
-- Right: stronger hex visibility
-
 ### Click Mode
 
 - **Hex mode**

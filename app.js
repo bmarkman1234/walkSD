@@ -1,9 +1,11 @@
 ﻿const sanDiegoCenter = [-117.1611, 32.7157];
 
 const metricSelect = document.getElementById("metric-select");
-const emphasisSlider = document.getElementById("emphasis-slider");
 const modeHexBtn = document.getElementById("mode-hex");
 const modeCommunityBtn = document.getElementById("mode-community");
+const infoToggleBtn = document.getElementById("info-toggle");
+const infoPanelEl = document.getElementById("info-panel");
+const infoCloseBtn = document.getElementById("info-close");
 
 const state = {
   mode: "hex",
@@ -504,15 +506,15 @@ map.on("load", async () => {
   });
 
   updateHexColor(metricSelect.value);
-  updateLayerEmphasis(emphasisSlider.value);
+  updateLayerEmphasis(100);
 
   const cityBounds = getBoundsForFeatureCollection(cityBoundaryData.features || []);
   if (cityBounds) {
     const isMobile = window.innerWidth <= 800;
     map.fitBounds(cityBounds, {
       padding: isMobile
-        ? { top: 22, bottom: 22, left: 22, right: 22 }
-        : { top: 30, bottom: 30, left: 320, right: 30 },
+        ? { top: 18, bottom: 18, left: 18, right: 18 }
+        : { top: 26, bottom: 26, left: 26, right: 26 },
       duration: 0,
       maxZoom: 12.2,
     });
@@ -559,8 +561,8 @@ map.on("click", "community-plan-fill", (event) => {
     const isMobile = window.innerWidth <= 800;
     map.fitBounds(bounds, {
       padding: isMobile
-        ? { top: 24, bottom: 24, left: 24, right: 24 }
-        : { top: 40, bottom: 40, left: 320, right: 40 },
+        ? { top: 20, bottom: 20, left: 20, right: 20 }
+        : { top: 28, bottom: 28, left: 28, right: 28 },
       duration: 700,
       maxZoom: 13.5,
     });
@@ -599,6 +601,25 @@ map.on("mouseleave", "community-plan-fill", () => {
 });
 
 metricSelect.addEventListener("change", (event) => updateHexColor(event.target.value));
-emphasisSlider.addEventListener("input", (event) => updateLayerEmphasis(event.target.value));
 modeHexBtn.addEventListener("click", () => setMode("hex"));
 modeCommunityBtn.addEventListener("click", () => setMode("community"));
+
+infoToggleBtn.addEventListener("click", () => {
+  infoPanelEl.classList.toggle("is-hidden");
+});
+
+infoCloseBtn.addEventListener("click", () => {
+  infoPanelEl.classList.add("is-hidden");
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    infoPanelEl.classList.add("is-hidden");
+  }
+});
+
+map.on("click", () => {
+  if (!infoPanelEl.classList.contains("is-hidden")) {
+    infoPanelEl.classList.add("is-hidden");
+  }
+});
