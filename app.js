@@ -8,7 +8,7 @@ const infoPanelEl = document.getElementById("info-panel");
 const infoCloseBtn = document.getElementById("info-close");
 
 const state = {
-  mode: "hex",
+  mode: "community",
   hexFeatures: [],
   communityFeatures: [],
   groceryPoints: [],
@@ -107,6 +107,10 @@ function formatNumber(value, decimals = 0) {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
+}
+
+function popupRow(label, value) {
+  return `<div class="popup-row"><strong>${label}:</strong> ${value}</div>`;
 }
 
 function centroidOfPolygonRing(ring) {
@@ -392,7 +396,7 @@ map.addControl(
   })
 );
 
-setMode("hex");
+setMode("community");
 
 map.on("load", async () => {
   const [hexData, communityData, cityBoundaryData, groceriesData, parksData, librariesData] = await Promise.all([
@@ -531,14 +535,14 @@ map.on("click", "hex-fill", (event) => {
   const center = featureCentroid(feature);
   const communityFeature = findCommunityFeatureForPoint(center);
   const communityPlanName = communityFeature?.properties?.cpname || "N/A";
-  const html = `
-    <strong>Hex ID:</strong> ${props.hex_id ?? "N/A"}<br>
-    <strong>Community Plan:</strong> ${communityPlanName}<br>
-    <strong>Combined Score:</strong> ${props.score ?? 0}<br>
-    <strong>Grocery/Convenience Store Count:</strong> ${props.grocery_count ?? 0}<br>
-    <strong>Park Count:</strong> ${props.park_count ?? 0}<br>
-    <strong>Library Count:</strong> ${props.library_count ?? 0}
-  `;
+  const html = [
+    popupRow("Hex ID", props.hex_id ?? "N/A"),
+    popupRow("Community Plan", communityPlanName),
+    popupRow("Combined Score", props.score ?? 0),
+    popupRow("Grocery/Convenience Store Count", props.grocery_count ?? 0),
+    popupRow("Park Count", props.park_count ?? 0),
+    popupRow("Library Count", props.library_count ?? 0),
+  ].join("");
 
   if (props.hex_id !== undefined && props.hex_id !== null) {
     flashSelectedHex(props.hex_id);
@@ -569,14 +573,14 @@ map.on("click", "community-plan-fill", (event) => {
   }
 
   const summary = getCommunitySummary(feature);
-  const html = `
-    <strong>Community:</strong> ${summary.communityName}<br>
-    <strong>Hexes:</strong> ${formatNumber(summary.hexCount)}<br>
-    <strong>Average Score:</strong> ${formatNumber(summary.averageScore, 2)}<br>
-    <strong>Total Grocery/Convenience Stores:</strong> ${formatNumber(summary.groceryTotal)}<br>
-    <strong>Total Parks:</strong> ${formatNumber(summary.parkTotal)}<br>
-    <strong>Total Libraries:</strong> ${formatNumber(summary.libraryTotal)}
-  `;
+  const html = [
+    popupRow("Community", summary.communityName),
+    popupRow("Hexes", formatNumber(summary.hexCount)),
+    popupRow("Average Score", formatNumber(summary.averageScore, 2)),
+    popupRow("Total Grocery/Convenience Stores", formatNumber(summary.groceryTotal)),
+    popupRow("Total Parks", formatNumber(summary.parkTotal)),
+    popupRow("Total Libraries", formatNumber(summary.libraryTotal)),
+  ].join("");
 
   new maplibregl.Popup()
     .setLngLat(event.lngLat)
