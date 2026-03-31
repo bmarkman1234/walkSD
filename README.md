@@ -1,6 +1,16 @@
-# walkSD
+# walkSD 🚶
+
+![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
+![DuckDB](https://img.shields.io/badge/DuckDB-SQL-FFF000?logo=duckdb&logoColor=black)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black)
+![MapLibre GL JS](https://img.shields.io/badge/MapLibre-GL_JS-2F80ED)
+![GeoJSON](https://img.shields.io/badge/GeoJSON-Data-34A853)
+![HTML5](https://img.shields.io/badge/HTML5-Markup-E34F26?logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-Styling-1572B6?logo=css3&logoColor=white)
 
 Live app: [https://bmarkman1234.github.io/walkSD/](https://bmarkman1234.github.io/walkSD/)
+
+![walkSD map preview](./walkability_map.png)
 
 walkSD is an interactive San Diego walkability map with two selection modes:
 - Hex-level exploration
