@@ -4,9 +4,7 @@ const metricSelect = document.getElementById("metric-select");
 const emphasisSlider = document.getElementById("emphasis-slider");
 const modeHexBtn = document.getElementById("mode-hex");
 const modeCommunityBtn = document.getElementById("mode-community");
-const hexStatsEl = document.getElementById("hex-stats");
 const communityStatsEl = document.getElementById("community-stats");
-const hexCardEl = document.getElementById("hex-card");
 const communityCardEl = document.getElementById("community-card");
 
 const state = {
@@ -78,7 +76,6 @@ function setMode(mode) {
   state.mode = mode;
   modeHexBtn.classList.toggle("is-active", mode === "hex");
   modeCommunityBtn.classList.toggle("is-active", mode === "community");
-  hexCardEl.classList.toggle("is-hidden", mode !== "hex");
   communityCardEl.classList.toggle("is-hidden", mode !== "community");
 
   if (mode === "hex" && map.getLayer("community-plan-selected")) {
@@ -322,20 +319,6 @@ function flashSelectedHex(hexId) {
   }, 1250);
 }
 
-function showHexDashboard(feature) {
-  const p = feature.properties || {};
-  const center = featureCentroid(feature);
-  const community = findCommunityNameForPoint(center);
-  setStats(hexStatsEl, [
-    ["Hex ID", p.hex_id ?? "N/A"],
-    ["Community Plan", community],
-    ["Combined Score", p.score ?? 0],
-    ["Grocery/Convenience", p.grocery_count ?? 0],
-    ["Parks", p.park_count ?? 0],
-    ["Libraries", p.library_count ?? 0],
-  ]);
-}
-
 function showCommunityDashboard(feature) {
   const communityName = feature.properties?.cpname || "Selected community";
   const hexesInCommunity = state.hexFeatures.filter((hex) =>
@@ -360,14 +343,23 @@ function showCommunityDashboard(feature) {
 
   const hexCount = hexesInCommunity.length;
   const averageScore = hexCount > 0 ? scoreTotal / hexCount : 0;
-  setStats(communityStatsEl, [
+  const summaryRows = [
     ["Community", communityName],
     ["Hexes", formatNumber(hexCount)],
     ["Average Score", formatNumber(averageScore, 2)],
     ["Total Grocery/Convenience", formatNumber(groceryTotal)],
     ["Total Parks", formatNumber(parkTotal)],
     ["Total Libraries", formatNumber(libraryTotal)],
-  ]);
+  ];
+  setStats(communityStatsEl, summaryRows);
+  return {
+    communityName,
+    hexCount,
+    averageScore,
+    groceryTotal,
+    parkTotal,
+    libraryTotal,
+  };
 }
 
 const map = new maplibregl.Map({
@@ -416,7 +408,6 @@ map.addControl(
   })
 );
 
-setStats(hexStatsEl, [["Status", "Click a hex"]]);
 setStats(communityStatsEl, [["Status", "Switch to Community mode and click a plan"]]);
 setMode("hex");
 
@@ -566,12 +557,8 @@ map.on("click", "hex-fill", (event) => {
     <strong>Library Count:</strong> ${props.library_count ?? 0}
   `;
 
-  showHexDashboard(feature);
   if (props.hex_id !== undefined && props.hex_id !== null) {
     flashSelectedHex(props.hex_id);
-  }
-  if (communityFeature?.properties?.cpcode !== undefined) {
-    flashSelectedCommunity(communityFeature.properties.cpcode);
   }
 
   new maplibregl.Popup()
@@ -598,7 +585,20 @@ map.on("click", "community-plan-fill", (event) => {
     });
   }
 
-  showCommunityDashboard(feature);
+  const summary = showCommunityDashboard(feature);
+  const html = `
+    <strong>Community:</strong> ${summary.communityName}<br>
+    <strong>Hexes:</strong> ${formatNumber(summary.hexCount)}<br>
+    <strong>Average Score:</strong> ${formatNumber(summary.averageScore, 2)}<br>
+    <strong>Total Grocery/Convenience:</strong> ${formatNumber(summary.groceryTotal)}<br>
+    <strong>Total Parks:</strong> ${formatNumber(summary.parkTotal)}<br>
+    <strong>Total Libraries:</strong> ${formatNumber(summary.libraryTotal)}
+  `;
+
+  new maplibregl.Popup()
+    .setLngLat(event.lngLat)
+    .setHTML(html)
+    .addTo(map);
 });
 
 map.on("mouseenter", "hex-fill", () => {
