@@ -539,7 +539,7 @@ map.on("click", "hex-fill", (event) => {
     popupRow("Hex ID", props.hex_id ?? "N/A"),
     popupRow("Community Plan", communityPlanName),
     popupRow("Combined Score", props.score ?? 0),
-    popupRow("Grocery/Convenience Store Count", props.grocery_count ?? 0),
+    popupRow("Grocery/Convenience Count", props.grocery_count ?? 0),
     popupRow("Park Count", props.park_count ?? 0),
     popupRow("Library Count", props.library_count ?? 0),
   ].join("");
@@ -577,7 +577,7 @@ map.on("click", "community-plan-fill", (event) => {
     popupRow("Community", summary.communityName),
     popupRow("Hexes", formatNumber(summary.hexCount)),
     popupRow("Average Score", formatNumber(summary.averageScore, 2)),
-    popupRow("Total Grocery/Convenience Stores", formatNumber(summary.groceryTotal)),
+    popupRow("Total Grocery/Convenience", formatNumber(summary.groceryTotal)),
     popupRow("Total Parks", formatNumber(summary.parkTotal)),
     popupRow("Total Libraries", formatNumber(summary.libraryTotal)),
   ].join("");

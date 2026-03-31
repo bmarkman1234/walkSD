@@ -126,13 +126,20 @@ body {
   padding: 10px 11px;
   font-size: 13px;
   line-height: 1.4;
-  width: fit-content;
+  width: max-content;
   min-width: 0;
-  max-width: 320px;
+  max-width: 390px;
 }
 
 .popup-row {
-  white-space: normal;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.popup-row strong {
+  flex: 0 0 auto;
 }
 
 @media (max-width: 680px) {
