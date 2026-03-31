@@ -16,7 +16,7 @@ Live app: [https://bmarkman1234.github.io/walkSD/](https://bmarkman1234.github.i
    - right = emphasize hex visibility
 4. Use **Click Mode**:
    - **Hex**: click a hex to see local values
-   - **Neighborhood**: click a community plan to see aggregated stats
+   - **Community**: click a community plan to see aggregated stats
 
 ## What the Map Shows
 

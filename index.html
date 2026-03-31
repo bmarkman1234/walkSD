@@ -11,7 +11,7 @@
   <div class="layout">
     <aside class="panel">
       <h1>walkSD</h1>
-      <p class="app-subtitle">Explore walkability by neighborhood and hex.</p>
+      <p class="app-subtitle">Explore walkability by community and hex.</p>
 
       <label for="metric-select" class="control-label">Color By</label>
       <select id="metric-select" class="control-select" aria-label="Choose hex color metric">
@@ -39,7 +39,7 @@
       <label class="control-label top-gap">Click Mode</label>
       <div class="mode-row" role="group" aria-label="Selection mode">
         <button id="mode-hex" class="mode-btn is-active" type="button">Hex</button>
-        <button id="mode-neighborhood" class="mode-btn" type="button">Neighborhood</button>
+        <button id="mode-community" class="mode-btn" type="button">Community</button>
       </div>
 
       <section id="hex-card" class="dashboard-card">
@@ -47,9 +47,9 @@
         <div id="hex-stats" class="stats-grid"></div>
       </section>
 
-      <section id="neighborhood-card" class="dashboard-card is-hidden">
-        <h2>Neighborhood Summary</h2>
-        <div id="neighborhood-stats" class="stats-grid"></div>
+      <section id="community-card" class="dashboard-card is-hidden">
+        <h2>Community Summary</h2>
+        <div id="community-stats" class="stats-grid"></div>
       </section>
 
       <section class="dashboard-card">
@@ -65,10 +65,10 @@
       <section class="dashboard-card">
         <h2>Why Hexes Help</h2>
         <div class="about-text">
-          <p>Hexes make coverage easier to compare across neighborhoods and reduce directional bias versus square grids.</p>
+          <p>Hexes make coverage easier to compare across communities and reduce directional bias versus square grids.</p>
           <p>Reference: <a href="https://pro.arcgis.com/en/pro-app/3.4/tool-reference/spatial-statistics/h-whyhexagons.htm#:~:text=Hexagons%20are%20preferable%20when%20your,2%20times%20N%20units%20away)." target="_blank" rel="noopener">ArcGIS: Why hexagons?</a>.</p>
           <p>For this walkshed map, hexes are used to summarize nearby access (800m for grocery/convenience and parks, 1200m for libraries) in a consistent way.</p>
-          <p>The hex size was chosen to balance local detail with stability: small enough to show neighborhood-level change, but large enough to avoid block-by-block noise.</p>
+          <p>The hex size was chosen to balance local detail with stability: small enough to show community-level change, but large enough to avoid block-by-block noise.</p>
         </div>
       </section>
 

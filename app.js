@@ -3,21 +3,26 @@
 const metricSelect = document.getElementById("metric-select");
 const emphasisSlider = document.getElementById("emphasis-slider");
 const modeHexBtn = document.getElementById("mode-hex");
-const modeNeighborhoodBtn = document.getElementById("mode-neighborhood");
+const modeCommunityBtn = document.getElementById("mode-community");
 const hexStatsEl = document.getElementById("hex-stats");
-const neighborhoodStatsEl = document.getElementById("neighborhood-stats");
+const communityStatsEl = document.getElementById("community-stats");
 const hexCardEl = document.getElementById("hex-card");
-const neighborhoodCardEl = document.getElementById("neighborhood-card");
+const communityCardEl = document.getElementById("community-card");
 
 const state = {
   mode: "hex",
   hexFeatures: [],
-  neighborhoodFeatures: [],
-  flashIntervalId: null,
-  flashTimeoutId: null,
+  communityFeatures: [],
+  groceryPoints: [],
+  parkPoints: [],
+  libraryPoints: [],
+  communityFlashIntervalId: null,
+  communityFlashTimeoutId: null,
+  hexFlashIntervalId: null,
+  hexFlashTimeoutId: null,
 };
 
-const neighborhoodPalette = [
+const communityPalette = [
   "#E69F00",
   "#56B4E9",
   "#009E73",
@@ -72,20 +77,32 @@ const colorExpressions = {
 function setMode(mode) {
   state.mode = mode;
   modeHexBtn.classList.toggle("is-active", mode === "hex");
-  modeNeighborhoodBtn.classList.toggle("is-active", mode === "neighborhood");
+  modeCommunityBtn.classList.toggle("is-active", mode === "community");
   hexCardEl.classList.toggle("is-hidden", mode !== "hex");
-  neighborhoodCardEl.classList.toggle("is-hidden", mode !== "neighborhood");
+  communityCardEl.classList.toggle("is-hidden", mode !== "community");
 
   if (mode === "hex" && map.getLayer("community-plan-selected")) {
-    if (state.flashIntervalId) {
-      clearInterval(state.flashIntervalId);
-      state.flashIntervalId = null;
+    if (state.communityFlashIntervalId) {
+      clearInterval(state.communityFlashIntervalId);
+      state.communityFlashIntervalId = null;
     }
-    if (state.flashTimeoutId) {
-      clearTimeout(state.flashTimeoutId);
-      state.flashTimeoutId = null;
+    if (state.communityFlashTimeoutId) {
+      clearTimeout(state.communityFlashTimeoutId);
+      state.communityFlashTimeoutId = null;
     }
     map.setFilter("community-plan-selected", ["==", ["get", "cpcode"], -99999]);
+  }
+
+  if (mode === "community" && map.getLayer("hex-selected")) {
+    if (state.hexFlashIntervalId) {
+      clearInterval(state.hexFlashIntervalId);
+      state.hexFlashIntervalId = null;
+    }
+    if (state.hexFlashTimeoutId) {
+      clearTimeout(state.hexFlashTimeoutId);
+      state.hexFlashTimeoutId = null;
+    }
+    map.setFilter("hex-selected", ["==", ["get", "hex_id"], -99999]);
   }
 }
 
@@ -205,13 +222,13 @@ function getBoundsForFeatureCollection(features) {
   return [[minX, minY], [maxX, maxY]];
 }
 
-function findNeighborhoodNameForPoint(point) {
-  const hit = state.neighborhoodFeatures.find((feature) => pointInFeature(point, feature));
+function findCommunityNameForPoint(point) {
+  const hit = state.communityFeatures.find((feature) => pointInFeature(point, feature));
   return hit?.properties?.cpname || "N/A";
 }
 
-function findNeighborhoodFeatureForPoint(point) {
-  return state.neighborhoodFeatures.find((feature) => pointInFeature(point, feature)) || null;
+function findCommunityFeatureForPoint(point) {
+  return state.communityFeatures.find((feature) => pointInFeature(point, feature)) || null;
 }
 
 function updateHexColor(metric) {
@@ -243,44 +260,75 @@ function updateLayerEmphasis(value) {
   }
 }
 
-function flashSelectedNeighborhood(cpcode) {
+function flashSelectedCommunity(cpcode) {
   if (!map.getLayer("community-plan-selected")) return;
 
-  if (state.flashIntervalId) {
-    clearInterval(state.flashIntervalId);
-    state.flashIntervalId = null;
+  if (state.communityFlashIntervalId) {
+    clearInterval(state.communityFlashIntervalId);
+    state.communityFlashIntervalId = null;
   }
-  if (state.flashTimeoutId) {
-    clearTimeout(state.flashTimeoutId);
-    state.flashTimeoutId = null;
+  if (state.communityFlashTimeoutId) {
+    clearTimeout(state.communityFlashTimeoutId);
+    state.communityFlashTimeoutId = null;
   }
 
   map.setFilter("community-plan-selected", ["==", ["get", "cpcode"], cpcode]);
   map.setPaintProperty("community-plan-selected", "line-opacity", 1);
 
   let visible = true;
-  state.flashIntervalId = setInterval(() => {
+  state.communityFlashIntervalId = setInterval(() => {
     visible = !visible;
     map.setPaintProperty("community-plan-selected", "line-opacity", visible ? 1 : 0.2);
   }, 160);
 
-  state.flashTimeoutId = setTimeout(() => {
-    if (state.flashIntervalId) {
-      clearInterval(state.flashIntervalId);
-      state.flashIntervalId = null;
+  state.communityFlashTimeoutId = setTimeout(() => {
+    if (state.communityFlashIntervalId) {
+      clearInterval(state.communityFlashIntervalId);
+      state.communityFlashIntervalId = null;
     }
     map.setPaintProperty("community-plan-selected", "line-opacity", 1);
-    state.flashTimeoutId = null;
+    state.communityFlashTimeoutId = null;
+  }, 1250);
+}
+
+function flashSelectedHex(hexId) {
+  if (!map.getLayer("hex-selected")) return;
+
+  if (state.hexFlashIntervalId) {
+    clearInterval(state.hexFlashIntervalId);
+    state.hexFlashIntervalId = null;
+  }
+  if (state.hexFlashTimeoutId) {
+    clearTimeout(state.hexFlashTimeoutId);
+    state.hexFlashTimeoutId = null;
+  }
+
+  map.setFilter("hex-selected", ["==", ["get", "hex_id"], hexId]);
+  map.setPaintProperty("hex-selected", "line-opacity", 1);
+
+  let visible = true;
+  state.hexFlashIntervalId = setInterval(() => {
+    visible = !visible;
+    map.setPaintProperty("hex-selected", "line-opacity", visible ? 1 : 0.2);
+  }, 160);
+
+  state.hexFlashTimeoutId = setTimeout(() => {
+    if (state.hexFlashIntervalId) {
+      clearInterval(state.hexFlashIntervalId);
+      state.hexFlashIntervalId = null;
+    }
+    map.setPaintProperty("hex-selected", "line-opacity", 1);
+    state.hexFlashTimeoutId = null;
   }, 1250);
 }
 
 function showHexDashboard(feature) {
   const p = feature.properties || {};
   const center = featureCentroid(feature);
-  const neighborhood = findNeighborhoodNameForPoint(center);
+  const community = findCommunityNameForPoint(center);
   setStats(hexStatsEl, [
     ["Hex ID", p.hex_id ?? "N/A"],
-    ["Community Plan", neighborhood],
+    ["Community Plan", community],
     ["Combined Score", p.score ?? 0],
     ["Grocery/Convenience", p.grocery_count ?? 0],
     ["Parks", p.park_count ?? 0],
@@ -288,28 +336,34 @@ function showHexDashboard(feature) {
   ]);
 }
 
-function showNeighborhoodDashboard(feature) {
-  const neighborhoodName = feature.properties?.cpname || "Selected neighborhood";
-  const hexesInNeighborhood = state.hexFeatures.filter((hex) =>
+function showCommunityDashboard(feature) {
+  const communityName = feature.properties?.cpname || "Selected community";
+  const hexesInCommunity = state.hexFeatures.filter((hex) =>
     pointInFeature(hex._centroid, feature)
   );
+  const scoreTotal = hexesInCommunity.reduce(
+    (sum, hex) => sum + Number(hex.properties?.score || 0),
+    0
+  );
+  const groceryTotal = state.groceryPoints.reduce(
+    (sum, point) => sum + (pointInFeature(point, feature) ? 1 : 0),
+    0
+  );
+  const parkTotal = state.parkPoints.reduce(
+    (sum, point) => sum + (pointInFeature(point, feature) ? 1 : 0),
+    0
+  );
+  const libraryTotal = state.libraryPoints.reduce(
+    (sum, point) => sum + (pointInFeature(point, feature) ? 1 : 0),
+    0
+  );
 
-  const hexCount = hexesInNeighborhood.length;
-  const groceryTotal = hexesInNeighborhood.reduce(
-    (sum, hex) => sum + Number(hex.properties?.grocery_count || 0),
-    0
-  );
-  const parkTotal = hexesInNeighborhood.reduce(
-    (sum, hex) => sum + Number(hex.properties?.park_count || 0),
-    0
-  );
-  const libraryTotal = hexesInNeighborhood.reduce(
-    (sum, hex) => sum + Number(hex.properties?.library_count || 0),
-    0
-  );
-  setStats(neighborhoodStatsEl, [
-    ["Neighborhood", neighborhoodName],
+  const hexCount = hexesInCommunity.length;
+  const averageScore = hexCount > 0 ? scoreTotal / hexCount : 0;
+  setStats(communityStatsEl, [
+    ["Community", communityName],
     ["Hexes", formatNumber(hexCount)],
+    ["Average Score", formatNumber(averageScore, 2)],
     ["Total Grocery/Convenience", formatNumber(groceryTotal)],
     ["Total Parks", formatNumber(parkTotal)],
     ["Total Libraries", formatNumber(libraryTotal)],
@@ -363,29 +417,41 @@ map.addControl(
 );
 
 setStats(hexStatsEl, [["Status", "Click a hex"]]);
-setStats(neighborhoodStatsEl, [["Status", "Switch to Neighborhood mode and click a plan"]]);
+setStats(communityStatsEl, [["Status", "Switch to Community mode and click a plan"]]);
 setMode("hex");
 
 map.on("load", async () => {
-  const [hexData, neighborhoodData, cityBoundaryData] = await Promise.all([
+  const [hexData, communityData, cityBoundaryData, groceriesData, parksData, librariesData] = await Promise.all([
     fetch("./data/hex_scores.geojson").then((r) => r.json()),
     fetch("./data/community_plans.geojson").then((r) => r.json()),
     fetch("./data/san_diego_boundary.geojson").then((r) => r.json()),
+    fetch("./data/groceries.geojson").then((r) => r.json()),
+    fetch("./data/parks.geojson").then((r) => r.json()),
+    fetch("./data/libraries.geojson").then((r) => r.json()),
   ]);
 
   state.hexFeatures = (hexData.features || []).map((f) => ({ ...f, _centroid: featureCentroid(f) }));
-  state.neighborhoodFeatures = (neighborhoodData.features || []).map((feature, idx) => ({
+  state.groceryPoints = (groceriesData.features || [])
+    .map((feature) => featureCentroid(feature))
+    .filter((point) => Array.isArray(point));
+  state.parkPoints = (parksData.features || [])
+    .map((feature) => featureCentroid(feature))
+    .filter((point) => Array.isArray(point));
+  state.libraryPoints = (librariesData.features || [])
+    .map((feature) => featureCentroid(feature))
+    .filter((point) => Array.isArray(point));
+  state.communityFeatures = (communityData.features || []).map((feature, idx) => ({
     ...feature,
     properties: {
       ...(feature.properties || {}),
-      plan_color: neighborhoodPalette[idx % neighborhoodPalette.length],
+      plan_color: communityPalette[idx % communityPalette.length],
       plan_index: idx,
     },
   }));
-  neighborhoodData.features = state.neighborhoodFeatures;
+  communityData.features = state.communityFeatures;
 
   map.addSource("hex-scores", { type: "geojson", data: hexData });
-  map.addSource("community-plans", { type: "geojson", data: neighborhoodData });
+  map.addSource("community-plans", { type: "geojson", data: communityData });
   map.addSource("city-boundary", { type: "geojson", data: cityBoundaryData });
 
   map.addLayer({
@@ -427,6 +493,18 @@ map.on("load", async () => {
       "line-color": "#27424c",
       "line-width": 0.45,
       "line-opacity": 0.45,
+    },
+  });
+
+  map.addLayer({
+    id: "hex-selected",
+    type: "line",
+    source: "hex-scores",
+    filter: ["==", ["get", "hex_id"], -99999],
+    paint: {
+      "line-color": "#000000",
+      "line-width": 3.2,
+      "line-opacity": 1,
     },
   });
 
@@ -477,8 +555,8 @@ map.on("click", "hex-fill", (event) => {
 
   const props = feature.properties || {};
   const center = featureCentroid(feature);
-  const neighborhoodFeature = findNeighborhoodFeatureForPoint(center);
-  const communityPlanName = neighborhoodFeature?.properties?.cpname || "N/A";
+  const communityFeature = findCommunityFeatureForPoint(center);
+  const communityPlanName = communityFeature?.properties?.cpname || "N/A";
   const html = `
     <strong>Hex ID:</strong> ${props.hex_id ?? "N/A"}<br>
     <strong>Community Plan:</strong> ${communityPlanName}<br>
@@ -489,8 +567,11 @@ map.on("click", "hex-fill", (event) => {
   `;
 
   showHexDashboard(feature);
-  if (neighborhoodFeature?.properties?.cpcode !== undefined) {
-    flashSelectedNeighborhood(neighborhoodFeature.properties.cpcode);
+  if (props.hex_id !== undefined && props.hex_id !== null) {
+    flashSelectedHex(props.hex_id);
+  }
+  if (communityFeature?.properties?.cpcode !== undefined) {
+    flashSelectedCommunity(communityFeature.properties.cpcode);
   }
 
   new maplibregl.Popup()
@@ -500,11 +581,11 @@ map.on("click", "hex-fill", (event) => {
 });
 
 map.on("click", "community-plan-fill", (event) => {
-  if (state.mode !== "neighborhood") return;
+  if (state.mode !== "community") return;
   const feature = event.features && event.features[0];
   if (!feature) return;
 
-  flashSelectedNeighborhood(feature.properties?.cpcode);
+  flashSelectedCommunity(feature.properties?.cpcode);
   const bounds = getFeatureBounds(feature);
   if (bounds) {
     const isMobile = window.innerWidth <= 800;
@@ -517,7 +598,7 @@ map.on("click", "community-plan-fill", (event) => {
     });
   }
 
-  showNeighborhoodDashboard(feature);
+  showCommunityDashboard(feature);
 });
 
 map.on("mouseenter", "hex-fill", () => {
@@ -529,7 +610,7 @@ map.on("mouseleave", "hex-fill", () => {
 });
 
 map.on("mouseenter", "community-plan-fill", () => {
-  map.getCanvas().style.cursor = state.mode === "neighborhood" ? "pointer" : "";
+  map.getCanvas().style.cursor = state.mode === "community" ? "pointer" : "";
 });
 
 map.on("mouseleave", "community-plan-fill", () => {
@@ -539,4 +620,4 @@ map.on("mouseleave", "community-plan-fill", () => {
 metricSelect.addEventListener("change", (event) => updateHexColor(event.target.value));
 emphasisSlider.addEventListener("input", (event) => updateLayerEmphasis(event.target.value));
 modeHexBtn.addEventListener("click", () => setMode("hex"));
-modeNeighborhoodBtn.addEventListener("click", () => setMode("neighborhood"));
+modeCommunityBtn.addEventListener("click", () => setMode("community"));
