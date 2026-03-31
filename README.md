@@ -37,7 +37,7 @@ Slide left/right to visually prioritize layers:
   - Community boundaries are **not** highlighted in Hex mode.
 
 - **Community mode**
-  - Click a community to open a popup and update the community summary panel.
+  - Click a community to open a popup.
   - The selected community boundary is highlighted (flashing outline).
 
 ## What You See When Clicking
@@ -54,7 +54,7 @@ Popup shows:
 
 ### Community click (Community mode)
 
-Popup + side panel show:
+Popup shows:
 - Community
 - Hexes
 - Average Score

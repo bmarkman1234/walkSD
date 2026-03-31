@@ -4,8 +4,6 @@ const metricSelect = document.getElementById("metric-select");
 const emphasisSlider = document.getElementById("emphasis-slider");
 const modeHexBtn = document.getElementById("mode-hex");
 const modeCommunityBtn = document.getElementById("mode-community");
-const communityStatsEl = document.getElementById("community-stats");
-const communityCardEl = document.getElementById("community-card");
 
 const state = {
   mode: "hex",
@@ -76,7 +74,6 @@ function setMode(mode) {
   state.mode = mode;
   modeHexBtn.classList.toggle("is-active", mode === "hex");
   modeCommunityBtn.classList.toggle("is-active", mode === "community");
-  communityCardEl.classList.toggle("is-hidden", mode !== "community");
 
   if (mode === "hex" && map.getLayer("community-plan-selected")) {
     if (state.communityFlashIntervalId) {
@@ -101,12 +98,6 @@ function setMode(mode) {
     }
     map.setFilter("hex-selected", ["==", ["get", "hex_id"], -99999]);
   }
-}
-
-function setStats(el, rows) {
-  el.innerHTML = rows
-    .map(([key, value]) => `<div class="stat-key">${key}</div><div class="stat-value">${value}</div>`)
-    .join("");
 }
 
 function formatNumber(value, decimals = 0) {
@@ -319,7 +310,7 @@ function flashSelectedHex(hexId) {
   }, 1250);
 }
 
-function showCommunityDashboard(feature) {
+function getCommunitySummary(feature) {
   const communityName = feature.properties?.cpname || "Selected community";
   const hexesInCommunity = state.hexFeatures.filter((hex) =>
     pointInFeature(hex._centroid, feature)
@@ -343,15 +334,6 @@ function showCommunityDashboard(feature) {
 
   const hexCount = hexesInCommunity.length;
   const averageScore = hexCount > 0 ? scoreTotal / hexCount : 0;
-  const summaryRows = [
-    ["Community", communityName],
-    ["Hexes", formatNumber(hexCount)],
-    ["Average Score", formatNumber(averageScore, 2)],
-    ["Total Grocery/Convenience", formatNumber(groceryTotal)],
-    ["Total Parks", formatNumber(parkTotal)],
-    ["Total Libraries", formatNumber(libraryTotal)],
-  ];
-  setStats(communityStatsEl, summaryRows);
   return {
     communityName,
     hexCount,
@@ -408,7 +390,6 @@ map.addControl(
   })
 );
 
-setStats(communityStatsEl, [["Status", "Switch to Community mode and click a plan"]]);
 setMode("hex");
 
 map.on("load", async () => {
@@ -585,7 +566,7 @@ map.on("click", "community-plan-fill", (event) => {
     });
   }
 
-  const summary = showCommunityDashboard(feature);
+  const summary = getCommunitySummary(feature);
   const html = `
     <strong>Community:</strong> ${summary.communityName}<br>
     <strong>Hexes:</strong> ${formatNumber(summary.hexCount)}<br>
