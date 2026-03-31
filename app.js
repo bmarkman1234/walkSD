@@ -535,7 +535,7 @@ map.on("click", "hex-fill", (event) => {
     <strong>Hex ID:</strong> ${props.hex_id ?? "N/A"}<br>
     <strong>Community Plan:</strong> ${communityPlanName}<br>
     <strong>Combined Score:</strong> ${props.score ?? 0}<br>
-    <strong>Grocery/Convenience Count:</strong> ${props.grocery_count ?? 0}<br>
+    <strong>Grocery/Convenience Store Count:</strong> ${props.grocery_count ?? 0}<br>
     <strong>Park Count:</strong> ${props.park_count ?? 0}<br>
     <strong>Library Count:</strong> ${props.library_count ?? 0}
   `;
@@ -573,7 +573,7 @@ map.on("click", "community-plan-fill", (event) => {
     <strong>Community:</strong> ${summary.communityName}<br>
     <strong>Hexes:</strong> ${formatNumber(summary.hexCount)}<br>
     <strong>Average Score:</strong> ${formatNumber(summary.averageScore, 2)}<br>
-    <strong>Total Grocery/Convenience:</strong> ${formatNumber(summary.groceryTotal)}<br>
+    <strong>Total Grocery/Convenience Stores:</strong> ${formatNumber(summary.groceryTotal)}<br>
     <strong>Total Parks:</strong> ${formatNumber(summary.parkTotal)}<br>
     <strong>Total Libraries:</strong> ${formatNumber(summary.libraryTotal)}
   `;
