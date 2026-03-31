@@ -126,12 +126,13 @@ body {
   padding: 10px 11px;
   font-size: 13px;
   line-height: 1.4;
-  min-width: 380px;
-  max-width: 460px;
+  width: fit-content;
+  min-width: 0;
+  max-width: 320px;
 }
 
 .popup-row {
-  white-space: nowrap;
+  white-space: normal;
 }
 
 @media (max-width: 680px) {
@@ -151,7 +152,8 @@ body {
   }
 
   .maplibregl-popup-content {
-    min-width: min(360px, calc(100vw - 28px));
+    width: auto;
+    min-width: 0;
     max-width: calc(100vw - 20px);
   }
 }
