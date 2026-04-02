@@ -48,6 +48,24 @@ body {
   padding: 8px 10px;
 }
 
+.slider-wrap {
+  display: grid;
+  gap: 5px;
+}
+
+.slider-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #333333;
+}
+
+.control-range {
+  width: 100%;
+  accent-color: #1f1f1f;
+}
+
 .mode-row {
   display: grid;
   grid-template-columns: 1fr 1fr auto;

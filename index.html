@@ -16,6 +16,19 @@
       <option value="park_count">Parks</option>
       <option value="library_count">Libraries</option>
     </select>
+    <div class="slider-wrap">
+      <label for="hex-opacity-slider" class="slider-label">Basemap Visibility</label>
+      <input
+        id="hex-opacity-slider"
+        class="control-range"
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value="20"
+        aria-label="Adjust basemap visibility beneath hexes"
+      />
+    </div>
     <div class="mode-row" role="group" aria-label="Selection mode">
       <button id="mode-community" class="mode-btn is-active" type="button">Community</button>
       <button id="mode-hex" class="mode-btn" type="button">Hex</button>

@@ -1,6 +1,6 @@
-﻿const sanDiegoCenter = [-117.1611, 32.7157];
+const sanDiegoCenter = [-117.1611, 32.7157];
 
-const metricSelect = document.getElementById("metric-select");
+const metricSelect = document.getElementById("metric-select");`r`nconst hexOpacitySlider = document.getElementById("hex-opacity-slider");
 const modeHexBtn = document.getElementById("mode-hex");
 const modeCommunityBtn = document.getElementById("mode-community");
 const infoToggleBtn = document.getElementById("info-toggle");
@@ -627,3 +627,5 @@ map.on("click", () => {
     infoPanelEl.classList.add("is-hidden");
   }
 });
+
+
