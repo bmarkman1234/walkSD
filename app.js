@@ -222,7 +222,8 @@ function updateHexColor(metric) {
 
 function updateHexTransparency(value) {
   const t = Math.max(0, Math.min(100, Number(value))) / 100;
-  const hexOpacity = 0.95 - 0.85 * t;
+  // Left (0): more basemap visible. Right (100): less basemap visible.
+  const hexOpacity = 0.18 + 0.77 * t;
   if (map.getLayer("hex-fill")) {
     map.setPaintProperty("hex-fill", "fill-opacity", hexOpacity);
   }
