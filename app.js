@@ -1,6 +1,7 @@
 const sanDiegoCenter = [-117.1611, 32.7157];
 
-const metricSelect = document.getElementById("metric-select");`r`nconst hexOpacitySlider = document.getElementById("hex-opacity-slider");
+const metricSelect = document.getElementById("metric-select");
+const hexOpacitySlider = document.getElementById("hex-opacity-slider");
 const modeHexBtn = document.getElementById("mode-hex");
 const modeCommunityBtn = document.getElementById("mode-community");
 const infoToggleBtn = document.getElementById("info-toggle");
@@ -19,19 +20,6 @@ const state = {
   hexFlashIntervalId: null,
   hexFlashTimeoutId: null,
 };
-
-const communityPalette = [
-  "#E69F00",
-  "#56B4E9",
-  "#009E73",
-  "#CC79A7",
-  "#0072B2",
-  "#D55E00",
-  "#F0E442",
-  "#8C510A",
-  "#5AB4AC",
-  "#7B3294",
-];
 
 const colorExpressions = {
   score: [
@@ -232,25 +220,11 @@ function updateHexColor(metric) {
   }
 }
 
-function updateLayerEmphasis(value) {
+function updateHexTransparency(value) {
   const t = Math.max(0, Math.min(100, Number(value))) / 100;
-
-  // Right side (t=1): hexes are strongest.
-  // Left side  (t=0): community boundaries are strongest.
-  const hexOpacity = 0.2 + (0.95 - 0.2) * t;
-  const communityFillOpacity = 0.32 + (0.08 - 0.32) * t;
-  const communityOutlineWidth = 1.6 + (0.85 - 1.6) * t;
-  const communityOutlineOpacity = 1.0 + (0.75 - 1.0) * t;
-
+  const hexOpacity = 0.95 - 0.85 * t;
   if (map.getLayer("hex-fill")) {
     map.setPaintProperty("hex-fill", "fill-opacity", hexOpacity);
-  }
-  if (map.getLayer("community-plan-fill")) {
-    map.setPaintProperty("community-plan-fill", "fill-opacity", communityFillOpacity);
-  }
-  if (map.getLayer("community-plan-outline")) {
-    map.setPaintProperty("community-plan-outline", "line-width", communityOutlineWidth);
-    map.setPaintProperty("community-plan-outline", "line-opacity", communityOutlineOpacity);
   }
 }
 
@@ -422,7 +396,6 @@ map.on("load", async () => {
     ...feature,
     properties: {
       ...(feature.properties || {}),
-      plan_color: communityPalette[idx % communityPalette.length],
       plan_index: idx,
     },
   }));
@@ -448,8 +421,8 @@ map.on("load", async () => {
     type: "fill",
     source: "community-plans",
     paint: {
-      "fill-color": ["get", "plan_color"],
-      "fill-opacity": 0.08,
+      "fill-color": "#a7a7a7",
+      "fill-opacity": 0.04,
     },
   });
 
@@ -510,7 +483,7 @@ map.on("load", async () => {
   });
 
   updateHexColor(metricSelect.value);
-  updateLayerEmphasis(100);
+  updateHexTransparency(hexOpacitySlider.value);
 
   const cityBounds = getBoundsForFeatureCollection(cityBoundaryData.features || []);
   if (cityBounds) {
@@ -605,6 +578,7 @@ map.on("mouseleave", "community-plan-fill", () => {
 });
 
 metricSelect.addEventListener("change", (event) => updateHexColor(event.target.value));
+hexOpacitySlider.addEventListener("input", (event) => updateHexTransparency(event.target.value));
 modeHexBtn.addEventListener("click", () => setMode("hex"));
 modeCommunityBtn.addEventListener("click", () => setMode("community"));
 
