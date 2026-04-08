@@ -25,11 +25,11 @@ const colorExpressions = {
   score: [
     "match",
     ["to-number", ["get", "score"], 0],
-    0, "#f0f0f0",
-    1, "#56B4E9",
-    2, "#009E73",
-    3, "#E69F00",
-    "#f0f0f0",
+    0, "#ffffff",
+    1, "#cfcfcf",
+    2, "#7a7a7a",
+    3, "#121212",
+    "#ffffff",
   ],
   grocery_count: [
     "step",
